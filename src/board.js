@@ -14,10 +14,8 @@ import {
 } from "./utilFunctions.js";
 import styles from "./board.module.css";
 
-function Board({ socket, gameId, userName, createdGameId }) {
+function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
   const mySwal = withReactContent(Swal);
-
-  const [users, setUsers] = useState([]);
 
   const navigate = useNavigate();
 
@@ -180,11 +178,6 @@ function Board({ socket, gameId, userName, createdGameId }) {
 
   // useEffect on socket subscription
   useEffect(() => {
-    socket.on("users", (data) => {
-      console.log("users", data);
-      setUsers(data);
-    });
-
     socket.on("receivedFromServer", (data) => {
       const { index, symbol } = data;
       setBoard((prevBoard) => {
@@ -244,6 +237,7 @@ function Board({ socket, gameId, userName, createdGameId }) {
 
   const leftGame = () => {
     navigate("/");
+    setUsers([]);
   };
 
   const handleClick = (rowIndex, itemIndex) => {
