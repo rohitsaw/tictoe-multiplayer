@@ -81,25 +81,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
 
             allowOutsideClick: false,
           })
-          .then((result) => {
-            if (result.isConfirmed) {
-              socket.emit("RestartGame", {
-                gameId: gameId,
-                userName: userName,
-                userId: socket.id,
-              });
-              restartGame();
-            } else if (result.isDenied) {
-              socket.emit("LeftGame", {
-                gameId: gameId,
-                userName: userName,
-                userId: socket.id,
-              });
-              leftGame();
-            } else if (result.isDismissed) {
-              return;
-            }
-          });
+          .then(handleModalResponse);
       }, 500);
     } else if (winner.isPlayer2Won) {
       setTimeout(() => {
@@ -118,25 +100,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
 
             allowOutsideClick: false,
           })
-          .then((result) => {
-            if (result.isConfirmed) {
-              socket.emit("RestartGame", {
-                gameId: gameId,
-                userName: userName,
-                userId: socket.id,
-              });
-              restartGame();
-            } else if (result.isDenied) {
-              socket.emit("LeftGame", {
-                gameId: gameId,
-                userName: userName,
-                userId: socket.id,
-              });
-              leftGame();
-            } else if (result.isDismissed) {
-              return;
-            }
-          });
+          .then(handleModalResponse);
       }, 500);
     } else if (winner.isGameDraw) {
       setTimeout(() => {
@@ -153,25 +117,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
 
             allowOutsideClick: false,
           })
-          .then((result) => {
-            if (result.isConfirmed) {
-              socket.emit("RestartGame", {
-                gameId: gameId,
-                userName: userName,
-                userId: socket.id,
-              });
-              restartGame();
-            } else if (result.isDenied) {
-              socket.emit("LeftGame", {
-                gameId: gameId,
-                userName: userName,
-                userId: socket.id,
-              });
-              leftGame();
-            } else if (result.isDismissed) {
-              return;
-            }
-          });
+          .then(handleModalResponse);
       }, 500);
     }
   }, [winner]);
@@ -190,33 +136,41 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
     socket.on("userLeftGame", ({ userName }) => {
       console.log(`${userName} has left game`);
       mySwal?.close();
-      socket.emit("LeftGame", {
-        gameId: gameId,
-        userName: userName,
-        userId: socket.id,
-      });
       leftGame();
     });
 
     socket.on("userRestartedGame", ({ userName }) => {
       console.log(`${userName} has requested to play again!`);
       mySwal?.close();
-      restartGame();
+      restartGame(false);
     });
 
     socket.on("userDisconnected", (userId) => {
       mySwal?.close();
-      socket.emit("LeftGame", {
-        gameId: gameId,
-        userName: userName,
-        userId: socket.id,
-      });
       leftGame();
     });
   }, [socket]);
 
-  const restartGame = () => {
+  const handleModalResponse = (result) => {
+    if (result.isConfirmed) {
+      restartGame(true);
+    } else if (result.isDenied) {
+      leftGame();
+    } else if (result.isDismissed) {
+      return;
+    }
+  };
+
+  const restartGame = (sendRestartMessage = false) => {
     console.log("restarting game");
+
+    if (sendRestartMessage) {
+      socket.emit("RestartGame", {
+        gameId: gameId,
+        userName: userName,
+        userId: socket.id,
+      });
+    }
 
     setBoard((prevBoard) => {
       return [
@@ -236,6 +190,11 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
   };
 
   const leftGame = () => {
+    socket.emit("LeftGame", {
+      gameId: gameId,
+      userName: userName,
+      userId: socket.id,
+    });
     navigate("/");
     setUsers([]);
   };
@@ -271,24 +230,15 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
   };
 
   const getBackGroundColor = (tmp) => {
-    if (winner.isPlayer1Won) {
-      if (
-        winner.player1Array.some(
-          (each) => JSON.stringify(each) === JSON.stringify(tmp)
-        )
-      ) {
-        return styles.winnerBackgroundColor;
-      }
-    } else if (winner.isPlayer2Won) {
-      if (
-        winner.player2Array.some(
-          (each) => JSON.stringify(each) === JSON.stringify(tmp)
-        )
-      ) {
-        return styles.winnerBackgroundColor;
-      }
-    }
-    return "";
+    const targetArray = winner.isPlayer1Won
+      ? winner.player1Array
+      : winner.player2Array;
+
+    if (
+      targetArray.some((each) => JSON.stringify(each) === JSON.stringify(tmp))
+    )
+      return styles.winnerBackgroundColor;
+    else return "";
   };
 
   return (
