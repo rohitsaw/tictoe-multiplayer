@@ -48,114 +48,120 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
       setWinner((prevObj) => {
         return { ...prevObj, isPlayer1Won: true, player1Array: array1 };
       });
-      mySwal
-        .fire({
-          title: isPlayer1
-            ? `Good job ${thisPlayer.userName}!`
-            : `${otherPlayer.userName} has won this game`,
-          html: isPlayer1 ? "You have won the Game!" : "You have lose!",
-          icon: isPlayer1 ? "success" : "error",
+      setTimeout(() => {
+        mySwal
+          .fire({
+            title: isPlayer1
+              ? `Good job ${thisPlayer.userName}!`
+              : `${otherPlayer.userName} has won this game`,
+            html: isPlayer1 ? "You have won the Game!" : "You have lose!",
+            icon: isPlayer1 ? "success" : "error",
 
-          showDenyButton: true,
-          denyButtonText: "Leave This Game!",
+            showDenyButton: true,
+            denyButtonText: "Leave This Game!",
 
-          confirmButtonText: "Restart Game!",
+            confirmButtonText: "Restart Game!",
 
-          allowOutsideClick: false,
-        })
-        .then((result) => {
-          if (result.isConfirmed) {
-            socket.emit("RestartGame", {
-              gameId: gameId,
-              userName: userName,
-              userId: socket.id,
-            });
-            restartGame();
-          } else if (result.isDenied) {
-            socket.emit("LeftGame", {
-              gameId: gameId,
-              userName: userName,
-              userId: socket.id,
-            });
-            leftGame();
-          } else if (result.isDismissed) {
-            return;
-          }
-        });
+            allowOutsideClick: false,
+          })
+          .then((result) => {
+            if (result.isConfirmed) {
+              socket.emit("RestartGame", {
+                gameId: gameId,
+                userName: userName,
+                userId: socket.id,
+              });
+              restartGame();
+            } else if (result.isDenied) {
+              socket.emit("LeftGame", {
+                gameId: gameId,
+                userName: userName,
+                userId: socket.id,
+              });
+              leftGame();
+            } else if (result.isDismissed) {
+              return;
+            }
+          });
+      }, 500);
     } else if (_isPlayer2Won) {
       setWinner((prevObj) => {
         return { ...prevObj, isPlayer2Won: true, player2Array: array2 };
       });
-      mySwal
-        .fire({
-          title: !isPlayer1
-            ? `Good job ${thisPlayer.userName}!`
-            : `${otherPlayer.userName} has won this game`,
-          html: !isPlayer1 ? "You have won the Game!" : "You have lose!",
-          icon: !isPlayer1 ? "success" : "error",
+      setTimeout(() => {
+        mySwal
+          .fire({
+            title: !isPlayer1
+              ? `Good job ${thisPlayer.userName}!`
+              : `${otherPlayer.userName} has won this game`,
+            html: !isPlayer1 ? "You have won the Game!" : "You have lose!",
+            icon: !isPlayer1 ? "success" : "error",
 
-          showDenyButton: true,
-          denyButtonText: "Leave This Game!",
+            showDenyButton: true,
+            denyButtonText: "Leave This Game!",
 
-          confirmButtonText: "Restart Game!",
+            confirmButtonText: "Restart Game!",
 
-          allowOutsideClick: false,
-        })
-        .then((result) => {
-          if (result.isConfirmed) {
-            socket.emit("RestartGame", {
-              gameId: gameId,
-              userName: userName,
-              userId: socket.id,
-            });
-            restartGame();
-          } else if (result.isDenied) {
-            socket.emit("LeftGame", {
-              gameId: gameId,
-              userName: userName,
-              userId: socket.id,
-            });
-            leftGame();
-          } else if (result.isDismissed) {
-            return;
-          }
-        });
+            allowOutsideClick: false,
+          })
+          .then((result) => {
+            if (result.isConfirmed) {
+              socket.emit("RestartGame", {
+                gameId: gameId,
+                userName: userName,
+                userId: socket.id,
+              });
+              restartGame();
+            } else if (result.isDenied) {
+              socket.emit("LeftGame", {
+                gameId: gameId,
+                userName: userName,
+                userId: socket.id,
+              });
+              leftGame();
+            } else if (result.isDismissed) {
+              return;
+            }
+          });
+      }, 500);
     } else if (_isNoOneWon) {
       setWinner((prevObj) => {
         return { ...prevObj, isGameDraw: true };
       });
-      mySwal
-        .fire({
-          title: "Game Draw!",
-          html: "No one won the Game!",
-          icon: "error",
+      setTimeout(() => {
+        mySwal
+          .fire({
+            title: "Game Draw!",
+            html: "No one won the Game!",
+            icon: "error",
 
-          showDenyButton: true,
-          denyButtonText: "Leave This Game!",
+            showDenyButton: true,
+            denyButtonText: "Leave This Game!",
 
-          confirmButtonText: "Restart Game!",
+            confirmButtonText: "Restart Game!",
 
-          allowOutsideClick: false,
-        })
-        .then((result) => {
-          if (result.isConfirmed) {
-            socket.emit("RestartGame", {
-              gameId: gameId,
-              userName: userName,
-              userId: socket.id,
-            });
-            restartGame();
-          } else if (result.isDenied) {
-            socket.emit("LeftGame", {
-              gameId: gameId,
-              userName: userName,
-              userId: socket.id,
-            });
-            leftGame();
-          } else if (result.isDismissed) {
-            return;
-          }
-        });
+            allowOutsideClick: false,
+          })
+          .then((result) => {
+            if (result.isConfirmed) {
+              socket.emit("RestartGame", {
+                gameId: gameId,
+                userName: userName,
+                userId: socket.id,
+              });
+              restartGame();
+            } else if (result.isDenied) {
+              socket.emit("LeftGame", {
+                gameId: gameId,
+                userName: userName,
+                userId: socket.id,
+              });
+              leftGame();
+            } else if (result.isDismissed) {
+              return;
+            }
+          });
+      }, 500);
     } else {
       setisThisPlayerMove((prev) => !prev);
     }
@@ -221,6 +227,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
 
   const leftGame = () => {
     navigate("/");
+    setUsers([]);
   };
 
   const handleClick = (rowIndex, itemIndex) => {
