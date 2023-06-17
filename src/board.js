@@ -14,8 +14,10 @@ import {
 } from "./utilFunctions.js";
 import styles from "./board.module.css";
 
-function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
+function Board({ socket, gameId, userName, createdGameId }) {
   const mySwal = withReactContent(Swal);
+
+  const [users, setUsers] = useState([]);
 
   const navigate = useNavigate();
 
@@ -39,6 +41,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
   const thisPlayer = getThisPlayerName(socket.id, users);
   const otherPlayer = getOtherPlayerName(socket.id, users);
 
+  // useEffect for board.
   useEffect(() => {
     const [_isPlayer1Won, array1] = isPlayer1WonFn(board);
     const [_isPlayer2Won, array2] = isPlayer2WonFn(board);
@@ -48,6 +51,22 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
       setWinner((prevObj) => {
         return { ...prevObj, isPlayer1Won: true, player1Array: array1 };
       });
+    } else if (_isPlayer2Won) {
+      setWinner((prevObj) => {
+        return { ...prevObj, isPlayer2Won: true, player2Array: array2 };
+      });
+    } else if (_isNoOneWon) {
+      setWinner((prevObj) => {
+        return { ...prevObj, isGameDraw: true };
+      });
+    } else {
+      setisThisPlayerMove((prev) => !prev);
+    }
+  }, [board]);
+
+  // useEffect for game over condition`
+  useEffect(() => {
+    if (winner.isPlayer1Won) {
       setTimeout(() => {
         mySwal
           .fire({
@@ -84,10 +103,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
             }
           });
       }, 500);
-    } else if (_isPlayer2Won) {
-      setWinner((prevObj) => {
-        return { ...prevObj, isPlayer2Won: true, player2Array: array2 };
-      });
+    } else if (winner.isPlayer2Won) {
       setTimeout(() => {
         mySwal
           .fire({
@@ -124,10 +140,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
             }
           });
       }, 500);
-    } else if (_isNoOneWon) {
-      setWinner((prevObj) => {
-        return { ...prevObj, isGameDraw: true };
-      });
+    } else if (winner.isGameDraw) {
       setTimeout(() => {
         mySwal
           .fire({
@@ -162,12 +175,16 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
             }
           });
       }, 500);
-    } else {
-      setisThisPlayerMove((prev) => !prev);
     }
-  }, [board]);
+  }, [winner]);
 
+  // useEffect on socket subscription
   useEffect(() => {
+    socket.on("users", (data) => {
+      console.log("users", data);
+      setUsers(data);
+    });
+
     socket.on("receivedFromServer", (data) => {
       const { index, symbol } = data;
       setBoard((prevBoard) => {
@@ -227,7 +244,6 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
 
   const leftGame = () => {
     navigate("/");
-    setUsers([]);
   };
 
   const handleClick = (rowIndex, itemIndex) => {

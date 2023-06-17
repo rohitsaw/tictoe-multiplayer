@@ -10,15 +10,6 @@ function App() {
 
   const [createdGameId, setCreatedGameId] = useState(null);
 
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    socket.on("users", (data) => {
-      console.log("users", data);
-      setUsers(data);
-    });
-  }, [socket]);
-
   return (
     <div className="App">
       <BrowserRouter>
@@ -38,8 +29,6 @@ function App() {
             path="/:gameId"
             element={
               <Board
-                users={users}
-                setUsers={setUsers}
                 socket={socket}
                 gameId={gameId}
                 userName={userName}
