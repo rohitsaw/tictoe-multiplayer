@@ -189,18 +189,13 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
     });
 
     socket.on("userDisconnected", (userId) => {
-      if (isPlayer1) {
-        restartGame();
-        setUsers([]);
-      } else {
-        mySwal?.close();
-        socket.emit("LeftGame", {
-          gameId: gameId,
-          userName: userName,
-          userId: socket.id,
-        });
-        leftGame();
-      }
+      mySwal?.close();
+      socket.emit("LeftGame", {
+        gameId: gameId,
+        userName: userName,
+        userId: socket.id,
+      });
+      leftGame();
     });
   }, [socket]);
 
