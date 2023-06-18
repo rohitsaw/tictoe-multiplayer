@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { useNavigate } from "react-router-dom";
 
 import {
   isPlayer1WonFn,
@@ -13,11 +12,10 @@ import {
   getOtherPlayerName,
 } from "./utilFunctions.js";
 import styles from "./board.module.css";
+import ShareButton from "./component/shareButton.js";
 
-function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
+function Board({ users, leaveGame, socket, gameId, createdGameId }) {
   const mySwal = withReactContent(Swal);
-
-  const navigate = useNavigate();
 
   const [board, setBoard] = useState([
     ["", "", ""],
@@ -134,9 +132,8 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
     });
 
     socket.on("userLeftGame", ({ userName }) => {
-      console.log(`${userName} has left game`);
       mySwal?.close();
-      leftGame();
+      leftGame(`${userName} has left game.`);
     });
 
     socket.on("userRestartedGame", ({ userName }) => {
@@ -145,9 +142,9 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
       restartGame(false);
     });
 
-    socket.on("userDisconnected", (userId) => {
+    socket.on("userDisconnected", (userName) => {
       mySwal?.close();
-      leftGame();
+      leftGame(`${userName} is disconnected from game.`);
     });
   }, [socket]);
 
@@ -155,7 +152,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
     if (result.isConfirmed) {
       restartGame(true);
     } else if (result.isDenied) {
-      leftGame();
+      leftGame("");
     } else if (result.isDismissed) {
       return;
     }
@@ -167,7 +164,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
     if (sendRestartMessage) {
       socket.emit("RestartGame", {
         gameId: gameId,
-        userName: userName,
+        userName: thisPlayer.userName,
         userId: socket.id,
       });
     }
@@ -189,14 +186,8 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
     });
   };
 
-  const leftGame = () => {
-    socket.emit("LeftGame", {
-      gameId: gameId,
-      userName: userName,
-      userId: socket.id,
-    });
-    navigate("/");
-    setUsers([]);
+  const leftGame = (reason) => {
+    leaveGame(gameId, thisPlayer.userName, reason);
   };
 
   const handleClick = (rowIndex, itemIndex) => {
@@ -216,7 +207,7 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
 
     socket.emit("madeMove", {
       gameId: gameId,
-      userName: userName,
+      userName: thisPlayer.userName,
       userId: socket.id,
       index: [rowIndex, itemIndex],
       symbol: isPlayer1 ? "X" : "0",
@@ -262,9 +253,12 @@ function Board({ users, setUsers, socket, gameId, userName, createdGameId }) {
             </div>
           </>
         ) : (
-          <div className={styles.headerSection2}>
-            Waiting for players to join...
-          </div>
+          <>
+            <div className={styles.headerSection2}>
+              <div> Waiting for players to join.. </div>
+              <ShareButton gameId={gameId} fromBaseUrl={false} />
+            </div>
+          </>
         )}
       </div>
       <div className={styles.board}>
